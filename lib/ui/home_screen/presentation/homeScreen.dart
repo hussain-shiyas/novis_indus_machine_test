@@ -1,19 +1,31 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:novis_machine_test/ui/home_screen/domain/model/patient_list_res_model.dart';
+import 'package:novis_machine_test/ui/home_screen/presentation/provider/home_notifier_provider.dart';
 import 'package:novis_machine_test/ui/home_screen/presentation/widget/appointment_widget.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   TextEditingController searchController = TextEditingController();
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((callback){
+      ref.read(homeNotifierProvider.notifier).getHomeResData();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final patientList= ref.watch(homeNotifierProvider);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -115,26 +127,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const Divider(),
-          Expanded(
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5.0),
-                  child: AppointmentWidget(
-                    index: index.toString(),
-                    date: "14-12-2020",
-                    name: "Hussain",
-                    packageType: "couple compo package",
-                    coupleName: "ariyillaa",
-                  ),
-                );
-              },
-              itemCount: 5,
-            ),
-          ),
+          patientList.when(initial: ()=>Container(), loading: (){
+            return Skeletonizer(
+              enabled: true,
+              enableSwitchAnimation: true,
+              child: _successWidget([Patient()]),
+            );
+          }, success: (successData){
+            return _successWidget(successData.patient??[]);
+          }, failure: (failureMsg)=>Container()),
+          
           Container(
             height: 45,
-            margin: EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+            margin: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: const Color(0xff006837),
@@ -153,6 +158,33 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Widget _successWidget(List<Patient> patient) {
+    return Expanded(
+            child: RefreshIndicator(
+              onRefresh: refresh,
+              color: Color(0xff006837),
+              child: ListView.builder(
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5.0),
+                    child: AppointmentWidget(
+                      index: (index+1).toString(),
+                      date: patient[index].dateNdTime??"",
+                      name: patient[index].name??"",
+                      packageType: patient[index].user??"",
+                      coupleName: patient[index].address,
+                    ),
+                  );
+                },
+                itemCount: 5,
+              ),
+            ),
+          );
+  }
+  Future<void> refresh()async{
+    await ref.read(homeNotifierProvider.notifier).getHomeResData();
   }
 }
 // child:
