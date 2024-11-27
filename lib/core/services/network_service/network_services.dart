@@ -43,7 +43,7 @@ class NetworkService {
     }
   }
   Map<String, String> get _headers => {
-    'Content-Type': 'application/json',
-    if (StorageServiceMixin().getData(MainBoxKeys.token) != null) 'Authorization': 'Bearer ${StorageServiceMixin().getData(MainBoxKeys.token)}',
+    'Content-Type': 'application/x-www-form-urlencoded',
+    if (StorageServiceMixin().getData<String?>(MainBoxKeys.token) != null) 'Authorization': 'Bearer ${StorageServiceMixin().getData(MainBoxKeys.token)}',
   };
 }

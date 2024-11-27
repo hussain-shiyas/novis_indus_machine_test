@@ -22,7 +22,7 @@ class LoginPageDatasourceImpl implements LoginPageDatasource {
         "username":username,
         "password":password
       };
-      final data = await networkService.post(EndPoints.getPatientList,body: body);
+      final data = await networkService.post(EndPoints.login,body: body);
       return Right(LoginResModel.fromJson(data));
     } catch (e) {
       return Left(FailureException(

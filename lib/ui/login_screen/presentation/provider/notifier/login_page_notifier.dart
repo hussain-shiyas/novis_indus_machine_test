@@ -11,15 +11,14 @@ class LoginPageNotifier extends StateNotifier<LoginPageState> with StorageServic
   Future<void> getLoginResData(String username, String password) async {
     state = const LoginPageState.loading();
     try {
-        var data = await repo.getLoginPageRepo("test_user","12345678");
-        // var data = await repo.getLoginPageRepo(username,password);
+        var data = await repo.getLoginPageRepo(username,password);
         state = data.fold(((failure) {
           return LoginPageState.failure(failure.message);
         }), (success) {
+          StorageServiceMixin().addData<String>(MainBoxKeys.token, success.token??"");
+
           return LoginPageSuccess(success);
         });
-      
-  
     } catch (e) {
       state = const LoginPageState.failure('failure.message');
     }
