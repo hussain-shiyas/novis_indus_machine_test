@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 class TitleTextField extends StatelessWidget {
   const TitleTextField({
     super.key,
-    required this.emailController,
+    required this.controller,
     this.hintText = "",
     required this.title,
     this.passwordMode = false,
   });
 
-  final TextEditingController emailController;
+  final TextEditingController controller;
   final String hintText;
   final String title;
   final bool passwordMode;
@@ -23,7 +23,7 @@ class TitleTextField extends StatelessWidget {
         Text(title),
         const SizedBox(height: 8),
         TextField(
-          controller: emailController,
+          controller: controller,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(color: const Color(0xff000000).withOpacity(.25)),

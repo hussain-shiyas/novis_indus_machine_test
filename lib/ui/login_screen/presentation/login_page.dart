@@ -69,13 +69,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                           height: 20,
                         ),
                         TitleTextField(
-                          emailController: emailController,
+                          controller: emailController,
                           hintText: "Enter your email",
                           title: "Email",
                         ),
                         const SizedBox(height: 20,),
                         TitleTextField(
-                          emailController: passwordController,
+                          controller: passwordController,
                           hintText: "Enter your Password",
                           title: "Password",
                           passwordMode: true,

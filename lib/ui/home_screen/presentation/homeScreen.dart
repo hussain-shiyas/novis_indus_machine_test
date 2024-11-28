@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:novis_machine_test/ui/home_screen/domain/model/patient_list_res_model.dart';
 import 'package:novis_machine_test/ui/home_screen/presentation/provider/home_notifier_provider.dart';
 import 'package:novis_machine_test/ui/home_screen/presentation/widget/appointment_widget.dart';
+import 'package:novis_machine_test/ui/register_screen/presentation/register_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -15,9 +16,10 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   TextEditingController searchController = TextEditingController();
+
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((callback){
+    WidgetsBinding.instance.addPostFrameCallback((callback) {
       ref.read(homeNotifierProvider.notifier).getHomeResData();
     });
     super.initState();
@@ -25,7 +27,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final patientList= ref.watch(homeNotifierProvider);
+    final patientList = ref.watch(homeNotifierProvider);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -127,30 +129,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const Divider(),
-          patientList.when(initial: ()=>Container(), loading: (){
-            return Skeletonizer(
-              enabled: true,
-              enableSwitchAnimation: true,
-              child: _successWidget([Patient()]),
-            );
-          }, success: (successData){
-            return _successWidget(successData.patient??[]);
-          }, failure: (failureMsg)=>Container()),
-          
-          Container(
-            height: 45,
-            margin: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: const Color(0xff006837),
-            ),
-            child: const Center(
-              child: Text(
-                "Register Now",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+          patientList.when(
+              initial: () => Container(),
+              loading: () {
+                return Skeletonizer(
+                  enabled: true,
+                  enableSwitchAnimation: true,
+                  child: _successWidget([Patient()]),
+                );
+              },
+              success: (successData) {
+                return _successWidget(successData.patient ?? []);
+              },
+              failure: (failureMsg) => Container()),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RegisterScreen(),
+                ),
+              );
+            },
+            child: Container(
+              height: 45,
+              margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xff006837),
+              ),
+              child: const Center(
+                child: Text(
+                  "Register Now",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -162,28 +177,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _successWidget(List<Patient> patient) {
     return Expanded(
-            child: RefreshIndicator(
-              onRefresh: refresh,
-              color: Color(0xff006837),
-              child: ListView.builder(
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5.0),
-                    child: AppointmentWidget(
-                      index: (index+1).toString(),
-                      date: patient[index].dateNdTime??"",
-                      name: patient[index].name??"",
-                      packageType: patient[index].user??"",
-                      coupleName: patient[index].address,
-                    ),
-                  );
-                },
-                itemCount: 5,
+      child: RefreshIndicator(
+        onRefresh: refresh,
+        color: Color(0xff006837),
+        child: ListView.builder(
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5.0),
+              child: AppointmentWidget(
+                index: (index + 1).toString(),
+                date: patient[index].dateNdTime ?? "",
+                name: patient[index].name ?? "",
+                packageType: patient[index].user ?? "",
+                coupleName: patient[index].address,
               ),
-            ),
-          );
+            );
+          },
+          itemCount: patient.length,
+        ),
+      ),
+    );
   }
-  Future<void> refresh()async{
+
+  Future<void> refresh() async {
     await ref.read(homeNotifierProvider.notifier).getHomeResData();
   }
 }
